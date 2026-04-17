@@ -134,6 +134,28 @@ export default function App() {
     alert('Export feature: Use browser Print (Ctrl+P) → Save as PDF, or take a screenshot!');
   }, []);
 
+  const [shareStatus, setShareStatus] = useState(null);
+
+  const handleShareToTelegram = useCallback(async () => {
+    const agentUrl = import.meta.env.VITE_TELEGRAM_AGENT_URL || 'http://localhost:3001';
+    setShareStatus('sending');
+    try {
+      const res = await fetch(`${agentUrl}/share`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ room, items, theme }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Request failed');
+      setShareStatus('ok');
+      setTimeout(() => setShareStatus(null), 3000);
+    } catch (err) {
+      console.error('Share to Telegram error:', err.message);
+      setShareStatus('err');
+      setTimeout(() => setShareStatus(null), 4000);
+    }
+  }, [room, items, theme]);
+
   const selectedItem = items.find((i) => i.instanceId === selectedId);
 
   return (
@@ -156,6 +178,8 @@ export default function App() {
         canUndo={historyIndex > 0}
         canRedo={historyIndex < history.length - 1}
         onExport={handleExport}
+        onShareToTelegram={handleShareToTelegram}
+        shareStatus={shareStatus}
       />
 
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>

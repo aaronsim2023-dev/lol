@@ -1,4 +1,4 @@
-export default function Toolbar({ room, onUndo, onRedo, canUndo, canRedo, onExport }) {
+export default function Toolbar({ room, onUndo, onRedo, canUndo, canRedo, onExport, onShareToTelegram, shareStatus }) {
   return (
     <header style={{
       height: '56px',
@@ -40,6 +40,8 @@ export default function Toolbar({ room, onUndo, onRedo, canUndo, canRedo, onExpo
         <ToolButton onClick={onExport} title="Export as PNG">
           💾
         </ToolButton>
+        <div style={{ width: '1px', height: '20px', background: 'var(--border)', margin: '0 4px' }} />
+        <ShareButton onClick={onShareToTelegram} status={shareStatus} />
       </div>
 
       {/* Keyboard shortcuts hint */}
@@ -54,6 +56,42 @@ export default function Toolbar({ room, onUndo, onRedo, canUndo, canRedo, onExpo
         R: Rotate · Del: Remove · Arrows: Move
       </div>
     </header>
+  );
+}
+
+function ShareButton({ onClick, status }) {
+  const label = status === 'sending' ? '⏳' : status === 'ok' ? '✅' : status === 'err' ? '❌' : '✈️';
+  const title =
+    status === 'sending' ? 'Sending to Telegram…' :
+    status === 'ok' ? 'Sent to Telegram!' :
+    status === 'err' ? 'Failed to send — check agent' :
+    'Share to Telegram';
+  return (
+    <button
+      onClick={onClick}
+      disabled={status === 'sending'}
+      title={title}
+      style={{
+        height: '32px',
+        padding: '0 10px',
+        border: '1px solid var(--border)',
+        borderRadius: '7px',
+        background: status === 'ok' ? '#22c55e22' : 'var(--bg)',
+        color: 'var(--text)',
+        cursor: status === 'sending' ? 'not-allowed' : 'pointer',
+        fontSize: '13px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '5px',
+        fontWeight: 500,
+        transition: 'all 0.15s',
+        whiteSpace: 'nowrap',
+      }}
+      onMouseEnter={(e) => { if (status !== 'sending') { e.currentTarget.style.background = '#229ED922'; } }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = status === 'ok' ? '#22c55e22' : 'var(--bg)'; }}
+    >
+      {label} Telegram
+    </button>
   );
 }
 
